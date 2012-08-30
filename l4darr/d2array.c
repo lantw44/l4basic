@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <l4darr.h>
 
-L4DA2* l4da2_create_setmax(int itemsize, int lenx, int leny){
+L4DA2* l4da2_create(int itemsize, int lenx, int leny){
 	if(lenx <= 0 || leny <= 0 || itemsize <= 0){
 		return NULL;
 	}

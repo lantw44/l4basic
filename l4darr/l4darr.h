@@ -53,9 +53,9 @@ void l4da2_free(L4DA2*);
 #define l4da2_getleny(arr) ((arr)->arr_leny)
 #define l4da2_itemsize(arr) ((arr)->arr_itemsize)
 #define l4da2_v(arr, type, numx, numy) \
-	(*(((type*)((arr)->arr_data))+((numx)*(l4da2_getlenx(arr)))+(numy)))
+	(*(((type*)((arr)->arr_data))+((numx)*(l4da2_getleny(arr)))+(numy)))
 #define l4da2_vp(arr, numx, numy) \
 	((void*)(((char*)((arr)->arr_data))+ \
-	((arr)->arr_itemsize)*((numx)*(l4da2_getlenx(arr))+(numy))))
+	((arr)->arr_itemsize)*((numx)*(l4da2_getleny(arr))+(numy))))
 
 #endif
