@@ -3,7 +3,7 @@ AR=ar
 RM=rm
 CFLAGS=-Wall -g -I.
 OBJ=
-LIBFILE=l4arg.a
+LIBFILE=libl4arg.a
 
 .PHONY: all clean
 

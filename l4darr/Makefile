@@ -3,7 +3,7 @@ AR=ar
 RM=rm
 CFLAGS=-Wall -g -I.
 OBJ=d1array.o d1arrstr.o d2array.o
-LIBFILE=l4darr.a
+LIBFILE=libl4darr.a
 
 .PHONY: all clean
 
