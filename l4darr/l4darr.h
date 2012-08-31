@@ -13,8 +13,6 @@ typedef struct l4lib_dyn_arr{
 } L4DA ;
 
 L4DA* l4da_create_setmax(int, int, int);
-/* #define l4da_create(itemsize, len) \
-	(l4da_create_setmax((itemsize), (len), (len))) */
 L4DA* l4da_create(int, int);
 void l4da_free(L4DA*);
 int l4da_pushback(L4DA*, void*);
@@ -43,7 +41,7 @@ int l4da_combine(L4DA*, const L4DA*);
 typedef struct l4lib_dyn_2darr{
 	int arr_itemsize;		/* 每個項目的大小 */
 	int arr_lenx;	 	 	/* 陣列 x 方向長度 */
-	int arr_leny;  		/* 陣列 y 方向長度 */
+	int arr_leny;  			/* 陣列 y 方向長度 */
 	void* arr_data; 	   	/* 資料區 */
 } L4DA2 ;
 
