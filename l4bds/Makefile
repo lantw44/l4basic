@@ -2,7 +2,7 @@ CC=cc
 AR=ar
 RM=rm
 CFLAGS=-Wall -g -I.
-OBJ=
+OBJ=list.o
 LIBFILE=libl4bds.a
 
 .PHONY: all clean
