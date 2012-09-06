@@ -74,7 +74,7 @@ L4LLNODE* l4ll_insert_prev(L4LL* list, L4LLNODE* node, void* data, int size){
 			free(newnode);
 			return NULL;
 		}
-		memcpy(newnode, data, size);
+		memcpy(newdata, data, size);
 	}
 	list->list_len++;
 	if(list->list_first == node){ /* 如果是第一個，那要修改 list_first */
@@ -108,7 +108,7 @@ L4LLNODE* l4ll_insert_next(L4LL* list, L4LLNODE* node, void* data, int size){
 			free(newnode);
 			return NULL;
 		}
-		memcpy(newnode, data, size);
+		memcpy(newdata, data, size);
 	}
 	list->list_len++;
 	if(list->list_last == node){
@@ -147,6 +147,29 @@ void l4ll_remove(L4LL* list, L4LLNODE* node){
 	if(oldprev != NULL){
 		oldprev->node_next = oldnext;
 	}
+}
+
+L4LLNODE* l4ll_goto(L4LLNODE* node, int count){
+	int i;
+	if(count == 0){
+		return node;
+	}else if(count > 0){
+		for(i=1; i<=count; i++){
+			node = node->node_next;
+			if(node == NULL){
+				return NULL;
+			}
+		}
+	}else{
+		count = -count;
+		for(i=1; i<=count; i++){
+			node = node->node_prev;
+			if(node == NULL){
+				return NULL;
+			}
+		}
+	}
+	return node;
 }
 
 #if 0

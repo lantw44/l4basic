@@ -36,6 +36,7 @@ void l4ll_remove(L4LL*, L4LLNODE*);
 	(l4ll_remove((list),(l4ll_node_back((list)))))
 #define l4ll_popfront(list) \
 	(l4ll_remove((list),(l4ll_node_front((list)))))
+L4LLNODE* l4ll_goto(L4LLNODE*, int);
 
 /*********** stack ***********/
 
