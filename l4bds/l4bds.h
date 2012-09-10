@@ -61,5 +61,6 @@ typedef L4LL L4QUEUE;
 #define l4queue_frontdatasize(list) (l4ll_datasize(l4ll_node_front(list)))
 #define l4queue_backdata(list) (l4ll_data(l4ll_node_back(list)))
 #define l4queue_backdatasize(list) (l4ll_datasize(l4ll_node_back(list)))
-
+#define l4queue_data(list) (l4queue_frontdata(list))
+#define l4queue_datasize(list) (l4queue_frontdatasize(list))
 #endif
