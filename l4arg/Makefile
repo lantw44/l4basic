@@ -1,8 +1,8 @@
 CC=cc
 AR=ar
 RM=rm
-CFLAGS=-Wall -g -I.
-OBJ=
+CFLAGS=-Wall -g -I. -I../l4darr
+OBJ=toargv.o
 LIBFILE=libl4arg.a
 
 .PHONY: all clean
