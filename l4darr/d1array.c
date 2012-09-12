@@ -108,3 +108,24 @@ int l4da_strip(L4DA* arr){
 	}
 	return 0;
 }
+
+/* 基本上直接玩 struct 的函式還是少用吧 */
+void* l4da_drop_struct(L4DA* arr){
+	void* toreturn = arr->arr_data;
+	free(arr);
+	return toreturn;
+}
+
+L4DA* l4da_make_struct(void* data, int itemsize, int len, int maxlen){
+	if(itemsize <= 0 || len < 0 || maxlen < len){
+		return NULL;
+	}
+	L4DA* arr = (L4DA*)malloc(sizeof(L4DA));
+	if(arr == NULL){
+		return NULL;
+	}
+	arr->arr_itemsize = itemsize;
+	arr->arr_curlen = len;
+	arr->arr_maxlen = maxlen;
+	return arr;
+}

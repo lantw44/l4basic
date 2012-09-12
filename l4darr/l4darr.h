@@ -36,6 +36,9 @@ L4DA* l4da_filereadline_delim(FILE*, int);
 L4DA* l4da_dup(const L4DA*);
 int l4da_combine(L4DA*, const L4DA*);
 
+void* l4da_drop_struct(L4DA*);
+L4DA* l4da_make_struct(void*, int, int, int);
+
 /*********** 二維陣列 (其實是用一維陣列來模擬，功能有限) ***********/
 
 typedef struct l4lib_dyn_2darr{
