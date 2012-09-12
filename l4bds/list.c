@@ -31,7 +31,7 @@ void l4ll_free(L4LL* oldlist){
 }
 
 static L4LLNODE* 
-l4ll_initfirst(L4LL* list, void* data, int size){
+l4ll_initfirst(L4LL* list, const void* data, int size){
 	/* 插入第一個資料，如果 list 不是空的就別用！
 	 * 否則會造成資料結構混亂和 memory leak */
 	L4LLNODE* node = (L4LLNODE*)malloc(sizeof(L4LLNODE));
@@ -57,7 +57,8 @@ l4ll_initfirst(L4LL* list, void* data, int size){
 	return node;
 }
 
-L4LLNODE* l4ll_insert_prev(L4LL* list, L4LLNODE* node, void* data, int size){
+L4LLNODE* l4ll_insert_prev(L4LL* list, L4LLNODE* node, 
+		const void* data, int size){
 	/* list 送 NULL 來的我不理它，就自己去 segfault 吧
 	 * node 送 NULL 來只能在 list 是空的時候用 */
 	if(list->list_len == 0){
@@ -92,7 +93,8 @@ L4LLNODE* l4ll_insert_prev(L4LL* list, L4LLNODE* node, void* data, int size){
 	return newnode;
 }
 
-L4LLNODE* l4ll_insert_next(L4LL* list, L4LLNODE* node, void* data, int size){
+L4LLNODE* l4ll_insert_next(L4LL* list, L4LLNODE* node, 
+		const void* data, int size){
 	/* 基本上同 l4ll_insert_prev */
 	if(list->list_len == 0){
 		return l4ll_initfirst(list, data, size);

@@ -25,8 +25,8 @@ void l4ll_free(L4LL*);
 #define l4ll_node_front(list) ((list)->list_first)
 #define l4ll_data(node) ((node)->node_data)
 #define l4ll_datasize(node) ((node)->node_data_size)
-L4LLNODE* l4ll_insert_prev(L4LL*, L4LLNODE*, void*, int);
-L4LLNODE* l4ll_insert_next(L4LL*, L4LLNODE*, void*, int);
+L4LLNODE* l4ll_insert_prev(L4LL*, L4LLNODE*, const void*, int);
+L4LLNODE* l4ll_insert_next(L4LL*, L4LLNODE*, const void*, int);
 void l4ll_remove(L4LL*, L4LLNODE*);
 #define l4ll_pushback(list,data,size) \
 	(l4ll_insert_next((list),(l4ll_node_back(list)),(data),(size)))

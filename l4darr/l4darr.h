@@ -15,7 +15,7 @@ typedef struct l4lib_dyn_arr{
 L4DA* l4da_create_setmax(int, int, int);
 L4DA* l4da_create(int, int);
 void l4da_free(L4DA*);
-int l4da_pushback(L4DA*, void*);
+int l4da_pushback(L4DA*, const void*);
 #define l4da_popback(arr) (((arr)->arr_curlen)--)
 #define l4da_getlen(arr) ((arr)->arr_curlen)
 int l4da_setlen(L4DA*, int);

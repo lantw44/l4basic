@@ -36,7 +36,7 @@ void l4da_free(L4DA* arr){
 	free(arr);
 }
 
-int l4da_pushback(L4DA* arr, void* data){
+int l4da_pushback(L4DA* arr, const void* data){
 	if((arr->arr_maxlen) < (arr->arr_curlen + 1)){
 		if(arr->arr_maxlen != 0){
 			if(l4da_setmax(arr, arr->arr_maxlen*2) < 0){
