@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 char** l4arg_toargv(const char*, const char*, const char*, const char*);
+void l4arg_toargv_free(char**);
 
 typedef struct l4lib_qarg {
 	char* arg_name;

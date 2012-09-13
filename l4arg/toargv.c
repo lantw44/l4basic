@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include <l4arg.h>
 #include <l4darr.h>
 
@@ -88,4 +89,12 @@ char** l4arg_toargv(const char* str,
 	}
 	rval = (char**)l4da_drop_struct(parr);
 	return rval;
+}
+
+void l4arg_toargv_free(char** pargv){
+	int i;
+	for(i=0; pargv[i]!=NULL; i++){
+		free(pargv[i]);
+	}
+	free(pargv);
 }
