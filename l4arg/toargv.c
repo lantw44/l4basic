@@ -18,7 +18,7 @@ char** l4arg_toargv(const char* str,
 	char escaped = 0, quoted = 0, delimed = 0;
 	L4DA* parr;
 	L4DA* tmpstr;
-	char* addstr;
+	char* addstr, tmpchar;
 	char** rval;
 	parr = l4da_create(sizeof(char*), 0);
 	if(parr == NULL){
@@ -47,6 +47,7 @@ char** l4arg_toargv(const char* str,
 				abort_l4arg_toargv;
 			}
 			delimed = 0;
+			continue;
 		}
 		if(strchr(esc, str[i]) != NULL){
 			escaped = 1;
@@ -57,20 +58,24 @@ char** l4arg_toargv(const char* str,
 			continue;
 		}
 		if(strchr(delim, str[i]) != NULL){
-			if(l4da_pushback(tmpstr, '\0') < 0){
-				abort_l4arg_toargv;
-			}
-			addstr = (char*)l4da_drop_struct(tmpstr);
-			if(l4da_pushback(parr, &addstr) < 0){
-				l4da_free(parr);
-				return NULL;
-			}
-			tmpstr = l4da_create(sizeof(char), 0);
-			if(tmpstr == NULL){
-				l4da_free(parr);
-				return NULL;
+			if(l4da_getlen(tmpstr) > 0){
+				tmpchar = '\0';
+				if(l4da_pushback(tmpstr, &tmpchar) < 0){
+					abort_l4arg_toargv;
+				}
+				addstr = (char*)l4da_drop_struct(tmpstr);
+				if(l4da_pushback(parr, &addstr) < 0){
+					l4da_free(parr);
+					return NULL;
+				}
+				tmpstr = l4da_create(sizeof(char), 0);
+				if(tmpstr == NULL){
+					l4da_free(parr);
+					return NULL;
+				}
 			}
 			delimed = 1;
+			continue;
 		}
 		if(l4da_pushback(tmpstr, &str[i]) < 0){
 			abort_l4arg_toargv;
@@ -78,7 +83,8 @@ char** l4arg_toargv(const char* str,
 		delimed = 0;
 	}
 	if(!delimed){
-		if(l4da_pushback(tmpstr, '\0') < 0){
+		tmpchar = '\0';
+		if(l4da_pushback(tmpstr, &tmpchar) < 0){
 			abort_l4arg_toargv;
 		}
 		addstr = (char*)l4da_drop_struct(tmpstr);
@@ -86,6 +92,11 @@ char** l4arg_toargv(const char* str,
 			l4da_free(parr);
 			return NULL;
 		}
+	}
+	addstr = NULL;
+	if(l4da_pushback(parr, &addstr) < 0){
+		l4da_free(parr);
+		return NULL;
 	}
 	rval = (char**)l4da_drop_struct(parr);
 	return rval;

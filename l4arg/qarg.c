@@ -14,7 +14,7 @@ L4QARG* l4qarg_parse(const char* str){
 	char* pos;
 	for(i=0; pargv[i]!=NULL; i++);
 	allc = i + 1;
-	qargarr = (L4QARG*) malloc(sizeof(L4QARG*) * allc);
+	qargarr = (L4QARG*) malloc(sizeof(L4QARG) * allc);
 	if(qargarr == NULL){
 		l4arg_toargv_free(pargv);
 		return NULL;
@@ -25,8 +25,8 @@ L4QARG* l4qarg_parse(const char* str){
 			qargarr[i].arg_name = pargv[i];
 			qargarr[i].arg_value = NULL;
 		}else{
-			pos = '\0';
-			qargarr[i].arg_name = pos;
+			*pos = '\0';
+			qargarr[i].arg_name = pargv[i];
 			pos++;
 			qargarr[i].arg_value = (char*) malloc(strlen(pos)+1);
 			if(qargarr[i].arg_value == NULL){
