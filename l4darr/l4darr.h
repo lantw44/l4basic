@@ -29,7 +29,7 @@ int l4da_strip(L4DA*);
 #define l4da_vp(arr, num) \
 	((void*)(((char*)((arr)->arr_data))+(((arr)->arr_itemsize)*(num))))
 
-#define l4da_readline (l4da_filereadline_delim(stdin, '\n'))
+#define l4da_readline() (l4da_filereadline_delim(stdin, '\n'))
 #define l4da_readline_delim(delim) (l4da_filereadline_delim(stdin, (delim)))
 #define l4da_filereadline(infile) (l4da_filereadline_delim((infile), '\n'))
 L4DA* l4da_filereadline_delim(FILE*, int);
