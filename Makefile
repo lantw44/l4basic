@@ -1,18 +1,13 @@
 
-.PHONY: all clean install uninstall
+.PHONY: all clean install uninstall deinstall remove
 all: 
-	$(MAKE) -C l4darr all
-	$(MAKE) -C l4bds all
-	$(MAKE) -C l4arg all
+	$(MAKE) -C src all
 clean:
-	$(MAKE) -C l4darr clean
-	$(MAKE) -C l4bds clean
-	$(MAKE) -C l4arg clean
+	$(MAKE) -C src clean
 install:
-	$(MAKE) -C l4darr install
-	$(MAKE) -C l4bds install
-	$(MAKE) -C l4arg install
+	$(MAKE) -C src install
 uninstall:
-	$(MAKE) -C l4darr uninstall
-	$(MAKE) -C l4bds uninstall
-	$(MAKE) -C l4arg uninstall
+	$(MAKE) -C src uninstall
+
+deinstall: uninstall
+remove: uninstall

@@ -1,0 +1,14 @@
+.deps
+.libs
+*~
+*.o
+*.lo
+*.a
+*.la
+*.so
+*.tar
+*.tar.*
+*.swp
+tags
+cscope.out
+\#*\#
