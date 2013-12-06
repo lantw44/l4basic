@@ -1,8 +1,11 @@
 # Programs
 HOST=
-CC=          $(HOST)c99
-AR=          $(HOST)ar
-RANLIB=      $(HOST)ranlib
+PROG_CC=     cc
+PROG_AR=     ar
+PROG_RANLIB= ranlib
+CC=          $(HOST)$(PROG_CC)
+AR=          $(HOST)$(PROG_AR)
+RANLIB=      $(HOST)$(PROG_RANLIB)
 RM=          rm -f
 MKDIR=       mkdir
 MKDIR_P=     $(MKDIR) -p
