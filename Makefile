@@ -28,7 +28,7 @@ INCLUDEDIR=  $(DESTDIR)$(PREFIX)/include
 # Tasks definition
 lib_LIBRARIES=         libl4basic.a
 libl4basic_a_OBJECTS=  l4array.o l4array2.o l4file.o l4list.o l4arg.o
-libl4basic_a_HEADERS=  $(libl4basic_a_OBJECTS:.o=.h)
+libl4basic_a_HEADERS=  $(libl4basic_a_OBJECTS:.o=.h) l4common.h
 
 check_PROGRAMS=        test-array test-array2 test-file test-list test-arg
 check_OBJECTS=         $(check_PROGRAMS:=.o)

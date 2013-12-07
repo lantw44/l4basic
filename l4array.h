@@ -7,12 +7,12 @@
 typedef struct LbsArrayStruct {
     /*< public >*/
     void* data;     /* data */
-    size_t len;     /* current length */
     void (*free_func) (void* data);
                     /* function to free the element */
 
     /*< private >*/
     size_t size;        /* element size */
+    size_t len;         /* current length */
     size_t max;         /* maximal length */
     unsigned ref_count; /* reference count */
     bool is_alloc;      /* is allocated using malloc */
