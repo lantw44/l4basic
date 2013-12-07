@@ -45,5 +45,6 @@ int main () {
     wait (&status);
     assert (WIFEXITED (status) && WEXITSTATUS (status) == 0);
 
+    puts ("test-file => PASS!");
     return 0;
 }
