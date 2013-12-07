@@ -149,11 +149,7 @@ void test_array_ptr (void) {
 void test_array_op (void) {
     LbsArray* array = lbs_array_new (sizeof (int));
     for (int i = 0; i < 80; i++) {
-#ifdef LBS_COMMON_ISO_C11
-        lbs_array_append (array, i);
-#else
-        lbs_array_append_data (array, &i);
-#endif
+        lbs_array_append_var (array, i);
     }
 
     lbs_array_remove (array);
