@@ -98,13 +98,7 @@ LbsArray* lbs_array_cat (LbsArray* dest, const LbsArray* more) {
 
 void* lbs_array_ref_generic (void* array_generic) {
     LbsArray* array = LBS_ARRAY (array_generic);
-    int oldref = array->ref_count;
-    int newref = oldref + 1;
-    if (newref <= oldref) {
-        return NULL;
-    }
-
-    array->ref_count = newref;
+    array->ref_count++;
     return array;
 }
 

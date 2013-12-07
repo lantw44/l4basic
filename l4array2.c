@@ -32,13 +32,7 @@ void lbs_array2_copy_out (LbsArray2* array2, void* copy_out) {
 
 void* lbs_array2_ref_generic (void* array2_generic) {
     LbsArray2* array2 = LBS_ARRAY2 (array2_generic);
-    int oldref = array2->ref_count;
-    int newref = oldref + 1;
-    if (newref <= oldref) {
-        return NULL;
-    }
-
-    array2->ref_count = newref;
+    array2->ref_count++;
     return array2;
 }
 
