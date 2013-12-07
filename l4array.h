@@ -1,43 +1,86 @@
-#ifndef L4LIB_DYNAMIC_ARRAY
-#define L4LIB_DYNAMIC_ARRAY
+/* vim: set sw=4 ts=4 sts=4 et: */
+#ifndef LBS_ARRAY_H
+#define LBS_ARRAY_H
 
-#include <stdio.h> /* 取得 FILE */
+#include <l4common.h>
 
-/*********** 一維陣列 ***********/
+typedef struct LbsArrayStruct {
+    /*< public >*/
+    void* data;     /* data */
+    size_t len;     /* current length */
+    void (*free_func) (void* data);
+                    /* function to free the element */
 
-typedef struct l4lib_dyn_arr{
-	int arr_itemsize;		/* 每個項目的大小 */
-	int arr_curlen;			/* 陣列總長度 */
-	int arr_maxlen;			/* 陣列最大長度 */
-	void* arr_data;			/* 資料區 */
-} L4DA ;
+    /*< private >*/
+    size_t size;        /* element size */
+    size_t max;         /* maximal length */
+    unsigned ref_count; /* reference count */
+    bool is_alloc;      /* is allocated using malloc */
+} LbsArray;
 
-L4DA* l4da_create_setmax(int, int, int);
-L4DA* l4da_create(int, int);
-void l4da_free(L4DA*);
-int l4da_pushback(L4DA*, const void*);
-#define l4da_popback(arr) (((arr)->arr_curlen)--)
-#define l4da_getlen(arr) ((arr)->arr_curlen)
-int l4da_setlen(L4DA*, int);
-#define l4da_getmax(arr) ((arr)->arr_maxlen)
-int l4da_setmax(L4DA*, int);
-int l4da_strip(L4DA*);
-#define l4da_itemsize(arr) ((arr)->arr_itemsize)
-#define l4da_data(arr) ((arr)->arr_data)
-#define l4da_v(arr, type, num) \
-	(*(((type*)((arr)->arr_data))+(num)))
-#define l4da_vp(arr, num) \
-	((void*)(((char*)((arr)->arr_data))+(((arr)->arr_itemsize)*(num))))
+#define   LBS_ARRAY(x)            ((LbsArray*)(x))
 
-#define l4da_readline() (l4da_filereadline_delim(stdin, '\n'))
-#define l4da_readline_delim(delim) (l4da_filereadline_delim(stdin, (delim)))
-#define l4da_filereadline(infile) (l4da_filereadline_delim((infile), '\n'))
-L4DA* l4da_filereadline_delim(FILE*, int);
+#define   lbs_array_new(size) \
+    (lbs_array_new_with_max (size, 0))
+LbsArray* lbs_array_new_with_max  (size_t size, size_t max);
 
-L4DA* l4da_dup(const L4DA*);
-int l4da_combine(L4DA*, const L4DA*);
+#define   lbs_array_init(array, size) \
+    (lbs_array_init_with_max (array, size, 0))
+int       lbs_array_init_with_max (LbsArray* array, size_t size, size_t max);
 
-void* l4da_drop_struct(L4DA*);
-L4DA* l4da_make_struct(void*, int, int, int);
+LbsArray* lbs_array_copy          (LbsArray* dest, const LbsArray* src);
+LbsArray* lbs_array_cat           (LbsArray* dest, const LbsArray* more);
 
-#endif
+#define   lbs_array_ref(array) \
+    (lbs_array_ref_generic (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)))
+#define   lbs_array_unref(array) \
+    (lbs_array_unref_generic (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)))
+void*     lbs_array_ref_generic   (void* array);
+void      lbs_array_unref_generic (void* array);
+
+#define   lbs_array_free(array) \
+    (lbs_array_free_generic (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)))
+void      lbs_array_free_generic  (void* array);
+void*     lbs_array_drop_struct   (LbsArray* array);
+LbsArray* lbs_array_make_struct   (LbsArray* array, size_t size, size_t len,
+                                   size_t max, void* data);
+
+#define   lbs_array_get_data(array) \
+    (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)->data)
+#define   lbs_array_get_size(array) \
+    (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)->size)
+#define   lbs_array_get_len(array) \
+    (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)->len)
+#define   lbs_array_get_max(array) \
+    (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)->max)
+#define   lbs_array_get_ref_count(array) \
+    (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)->ref_count)
+#define   lbs_array_get_is_alloc(array) \
+    (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)->is_alloc)
+#define   lbs_array_get_free_func(array) \
+    (LBS_COMMON_CHECK_TYPE ((array), LbsArray*)->free_func)
+
+int       lbs_array_set_len       (LbsArray* array, size_t len);
+int       lbs_array_set_max       (LbsArray* array, size_t max);
+#define   lbs_array_set_free_func(array,value) \
+    ((LBS_COMMON_CHECK_TYPE ((array), LbsArray*)->free_func) = (value))
+
+#define   lbs_array_append_var(array,var) \
+    lbs_array_append_data ((array), (&(var)))
+int       lbs_array_append_ptr    (LbsArray* array, const void* ptr);
+int       lbs_array_append_data   (LbsArray* array, const void* data);
+int       lbs_array_remove        (LbsArray* array);
+int       lbs_array_minimize      (LbsArray* array);
+#define   lbs_array_push_back     lbs_array_append_data
+#define   lbs_array_push          lbs_array_append_data
+#define   lbs_array_pop_back      lbs_array_remove
+#define   lbs_array_pop           lbs_array_remove
+
+#define   lbs_array_vp(array, index) \
+    ((void*)(((char*)((array)->data))+(((array)->size)*(index))))
+#define   lbs_array_v(array, type, index) \
+    (*(((type*)((array)->data))+(index)))
+#define   lbs_array_index         lbs_array_v
+#define   lbs_array_index_ptr     lbs_array_vp
+
+#endif /* LBS_ARRAY_H */
