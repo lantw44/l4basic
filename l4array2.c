@@ -1,26 +1,51 @@
+/* vim: set sw=4 ts=4 sts=4 et: */
 #include "l4array2.h"
-#include <stdlib.h>
 
-L4DA2* l4da2_create(int itemsize, int lenx, int leny){
-	if(lenx <= 0 || leny <= 0 || itemsize <= 0){
+#include <stdlib.h>
+#include <string.h>
+
+LbsArray2* lbs_array2_new (size_t size, int lenx, int leny) {
+	if(size <= 0 || lenx <= 0 || leny <= 0){
 		return NULL;
 	}
-	L4DA2* arr = (L4DA2*)malloc(sizeof(L4DA2));
-	if(arr == NULL){
+
+	LbsArray2* array2 = malloc (
+        sizeof (LbsArray2) + size * lenx * leny);
+	if(array2 == NULL){
 		return NULL;
 	}
-	arr->arr_itemsize = itemsize;
-	arr->arr_lenx = lenx;
-	arr->arr_leny = leny;
-	arr->arr_data = malloc(itemsize*lenx*leny);
-	if(arr->arr_data == NULL){
-		free(arr);
-		return NULL;
-	}
-	return arr;
+
+	array2->size = size;
+	array2->lenx = lenx;
+	array2->leny = leny;
+    array2->ref_count = 1;
+	return array2;
 }
 
-void l4da2_free(L4DA2* arr){
-	free(arr->arr_data);
-	free(arr);
+void lbs_array2_copy_in (LbsArray2* array2, const void* copy_in) {
+    memcpy (array2->data, copy_in, array2->size * array2->lenx * array2->leny);
+}
+
+void lbs_array2_copy_out (LbsArray2* array2, void* copy_out) {
+    memcpy (copy_out, array2->data, array2->size * array2->lenx * array2->leny);
+}
+
+void* lbs_array2_ref_generic (void* array2_generic) {
+    LbsArray2* array2 = LBS_ARRAY2 (array2_generic);
+    int oldref = array2->ref_count;
+    int newref = oldref + 1;
+    if (newref <= oldref) {
+        return NULL;
+    }
+
+    array2->ref_count = newref;
+    return array2;
+}
+
+void lbs_array2_unref_generic (void* array2_generic) {
+    LbsArray2* array2 = LBS_ARRAY2 (array2_generic);
+    array2->ref_count--;
+    if (array2->ref_count <= 0) {
+        free (array2_generic);
+    }
 }

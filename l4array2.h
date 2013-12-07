@@ -1,25 +1,49 @@
-#ifndef L4LIB_DYNAMIC_ARRAY_D2
-#define L4LIB_DYNAMIC_ARRAY_D2
+/* vim: set sw=4 ts=4 sts=4 et: */
+#ifndef LBS_ARRAY2_H
+#define LBS_ARRAY2_H
 
-/*********** 二維陣列 (其實是用一維陣列來模擬，功能有限) ***********/
+#include <l4common.h>
 
-typedef struct l4lib_dyn_2darr{
-	int arr_itemsize;		/* 每個項目的大小 */
-	int arr_lenx;	 	 	/* 陣列 x 方向長度 */
-	int arr_leny;  			/* 陣列 y 方向長度 */
-	void* arr_data; 	   	/* 資料區 */
-} L4DA2 ;
+typedef struct LbsArray2Struct {
+    /*< private >*/
+    size_t size;        /* element size */
+    size_t lenx;        /* x length */
+    size_t leny;        /* y length */
+    unsigned ref_count; /* reference count */
 
-L4DA2* l4da2_create(int, int, int);
-void l4da2_free(L4DA2*);
-#define l4da2_getlenx(arr) ((arr)->arr_lenx)
-#define l4da2_getleny(arr) ((arr)->arr_leny)
-#define l4da2_itemsize(arr) ((arr)->arr_itemsize)
-#define l4da2_data(arr) ((arr)->arr_data)
-#define l4da2_v(arr, type, numx, numy) \
-	(*(((type*)((arr)->arr_data))+((numx)*(l4da2_getleny(arr)))+(numy)))
-#define l4da2_vp(arr, numx, numy) \
-	((void*)(((char*)((arr)->arr_data))+ \
-	((arr)->arr_itemsize)*((numx)*(l4da2_getleny(arr))+(numy))))
+    /*< public >*/
+    char data[];        /* data */
+} LbsArray2;
 
-#endif
+#define    LBS_ARRAY2(x)            ((LbsArray2*)(x))
+
+LbsArray2* lbs_array2_new           (size_t size, int lenx, int leny);
+void       lbs_array2_copy_in       (LbsArray2* array2, const void* copy_in);
+void       lbs_array2_copy_out      (LbsArray2* array2, void* copy_out);
+
+#define   lbs_array2_ref(array2) \
+    (lbs_array2_ref_generic (LBS_COMMON_CHECK_TYPE ((array2), LbsArray2*)))
+#define   lbs_array2_unref(array2) \
+    (lbs_array2_unref_generic (LBS_COMMON_CHECK_TYPE ((array2), LbsArray2*)))
+void*      lbs_array2_ref_generic   (void* array2);
+void       lbs_array2_unref_generic (void* array2);
+
+#define   lbs_array2_get_data(array2) \
+    (LBS_COMMON_CHECK_TYPE ((array2), LbsArray2*)->data)
+#define   lbs_array2_get_size(array2) \
+    (LBS_COMMON_CHECK_TYPE ((array2), LbsArray2*)->size)
+#define   lbs_array2_get_lenx(array2) \
+    (LBS_COMMON_CHECK_TYPE ((array2), LbsArray2*)->lenx)
+#define   lbs_array2_get_leny(array2) \
+    (LBS_COMMON_CHECK_TYPE ((array2), LbsArray2*)->leny)
+#define   lbs_array2_get_ref_count(array2) \
+    (LBS_COMMON_CHECK_TYPE ((array2), LbsArray2*)->ref_count)
+
+#define   lbs_array2_v(array2,type,x,y) \
+    (*(((type*)((array2)->data)) + \
+    ((x)*((array2)->leny))+(y)))
+#define   lbs_array2_vp(array2,x,y) \
+    ((void*)(((char*)((array2)->data)) + \
+    ((array2)->size)*((x)*((array2)->leny)+(y))))
+
+#endif /* LBS_ARRAY2_H */
