@@ -20,4 +20,6 @@
 # define LBS_COMMON_CHECK_TYPE(x,type) (x)
 #endif /* __STDC_VERSION__ */
 
+#define LBS_COMMON_NULL_PTR ((void*)NULL)
+
 #endif /* LBS_COMMON_H */

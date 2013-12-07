@@ -66,7 +66,7 @@ int       lbs_array_set_max       (LbsArray* array, size_t max);
     ((LBS_COMMON_CHECK_TYPE ((array), LbsArray*)->free_func) = (value))
 
 #define   lbs_array_append_var(array,var) \
-    lbs_array_append_data ((array), (&(var)))
+    (lbs_array_append_data ((array), (&(var))))
 int       lbs_array_append_ptr    (LbsArray* array, const void* ptr);
 int       lbs_array_append_data   (LbsArray* array, const void* data);
 int       lbs_array_remove        (LbsArray* array);

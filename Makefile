@@ -42,9 +42,9 @@ l4arg_o_DEPENDS=       l4common.h l4array.o
 
 test_array_o_DEPENDS=  l4array.o
 test_array2_o_DEPENDS= l4array2.o
-test_file_o_DEPENDS=   l4file.o
+test_file_o_DEPENDS=   l4file.o l4array.o
 test_list_o_DEPENDS=   l4list.o
-test_arg_o_DEPENDS=    l4arg.o
+test_arg_o_DEPENDS=    l4arg.o l4array.o
 
 .POSIX:
 .PHONY: all clean install install-HEADERS install-LIB \
