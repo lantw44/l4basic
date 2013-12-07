@@ -37,6 +37,9 @@ void* lbs_array2_ref_generic (void* array2_generic) {
 }
 
 void lbs_array2_unref_generic (void* array2_generic) {
+    if (array2_generic == NULL) {
+        return;
+    }
     LbsArray2* array2 = LBS_ARRAY2 (array2_generic);
     array2->ref_count--;
     if (array2->ref_count <= 0) {

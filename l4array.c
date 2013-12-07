@@ -103,6 +103,9 @@ void* lbs_array_ref_generic (void* array_generic) {
 }
 
 void lbs_array_unref_generic (void* array_generic) {
+    if (array_generic == NULL) {
+        return;
+    }
     LbsArray* array = LBS_ARRAY (array_generic);
     array->ref_count--;
     if (array->ref_count <= 0) {
@@ -111,6 +114,9 @@ void lbs_array_unref_generic (void* array_generic) {
 }
 
 void lbs_array_free_generic (void* array_generic) {
+    if (array_generic == NULL) {
+        return;
+    }
     LbsArray* array = LBS_ARRAY (array_generic);
     if (array->free_func != NULL) {
         int i = 0;
