@@ -31,6 +31,7 @@ int main () {
             putc ('\n', fw);
             lbs_array_unref (line);
         }
+        lbs_array_unref (line);
 
         fclose (fp);
         fclose (fw);
