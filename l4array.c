@@ -74,7 +74,9 @@ LbsArray* lbs_array_copy (LbsArray* dest, const LbsArray* src) {
 
     dest->len = src->len;
     dest->free_func = src->free_func;
-    memcpy (dest->data, src->data, src->size * src->len);
+    if (src->data != NULL) {
+        memcpy (dest->data, src->data, src->size * src->len);
+    }
     return dest;
 }
 
