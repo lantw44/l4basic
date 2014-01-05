@@ -1,163 +1,216 @@
 #include "l4arg.h"
 #include "l4array.h"
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-/* 基本上優先順序是 escape -> quoting -> delimiter */
+LbsStrv* lbs_arg_parse (const char* str, const char* delim,
+	const char* esc, const LbsArgQuote* q, LbsArray** detail_ptr) {
 
-#define abort_l4arg_toargv \
-	do{ \
-		l4da_free(parr); \
-		l4da_free(tmpstr); \
-		return NULL; \
-	}while(0)
-
-char** l4arg_toargv(const char* str, 
-		const char* delim, const char* quoting, const char* esc){
-	int i;
-	char escaped = 0, quoted = 0, delimed = 0;
-	L4DA* parr;
-	L4DA* tmpstr;
-	char* addstr, tmpchar;
-	char** rval;
-	parr = l4da_create(sizeof(char*), 0);
-	if(parr == NULL){
+	LbsStrv* strv = lbs_strv_new ();
+	if (strv == NULL) {
 		return NULL;
 	}
-	tmpstr = l4da_create(sizeof(char), 0);
-	if(tmpstr == NULL){
-		l4da_free(parr);
-		return NULL;
+	/* goto label => free_strv */
+
+	// string length cache
+	int qlen; // user-supplied quoting string table length
+	for (qlen = 0; q[qlen].left != NULL && q[qlen].right != NULL; qlen++);
+
+	// qlen will not be too long, so we can use VLA
+	int qllen[qlen <= 0 ? 1 : qlen]; // left quoting string length
+	int qrlen[qlen <= 0 ? 1 : qlen]; // right quoting string length
+	for (int i = 0; i < qlen; i++) {
+		// empty strings are not allowed
+		qllen[i] = strlen (q[i].left);
+		if (qllen[i] <= 0) {
+			goto free_strv;
+		}
+		qrlen[i] = strlen (q[i].right);
+		if (qrlen[i] <= 0) {
+			goto free_strv;
+		}
 	}
-	for(i=0; str[i]!='\0'; i++){
-		if(escaped){
-			if(l4da_pushback(tmpstr, &str[i]) < 0){
-				abort_l4arg_toargv;
+
+	LbsArray* detail;
+	if (detail_ptr != NULL) {
+		detail = lbs_array_new (sizeof (int));
+		if (detail == NULL) {
+			goto free_strv;
+		}
+		if (lbs_array_push_back (detail, &(int){-1}) < 0) {
+			goto free_detail;
+		}
+	} else {
+		detail = NULL;
+	}
+	/* goto label => free_detail */
+
+	bool is_delimed = true;
+	bool is_escaped = false;
+	bool is_quoted = false;
+	bool ignore_esc = false;
+	int stri = 0; // strv index
+	int qi; // quoting string index currently used
+
+	const char* p = str;
+	for (; *p != '\0'; p++) {
+loop_start:
+		if (is_escaped) {
+			if (lbs_strv_append_char (strv, stri, *p) < 0) {
+				goto free_detail;
 			}
-			escaped = 0;
-			delimed = 0;
+			is_escaped = false;
 			continue;
 		}
-		if(quoted){
-			if(strchr(quoting, str[i]) != NULL){
-				quoted = 0;
+
+		if (is_quoted) {
+			if (strncmp (p, q[qi].right, qrlen[qi]) == 0) {
+				is_quoted = false;
+				is_escaped = false;
+				ignore_esc = false;
+				p += qrlen[qi] - 1;
+			} else {
+				if (!ignore_esc && strchr (esc, *p)) {
+					is_escaped = true;
+				} else {
+					if (lbs_strv_append_char (strv, stri, *p) < 0) {
+						goto free_detail;
+					}
+				}
+			}
+			continue;
+		}
+
+		if (strchr (delim, *p)) {
+			if (is_delimed) {
 				continue;
 			}
-			if(l4da_pushback(tmpstr, &str[i]) < 0){
-				abort_l4arg_toargv;
+			if (lbs_strv_append_str_empty (strv) < 0) {
+				goto free_detail;
 			}
-			delimed = 0;
-			continue;
-		}
-		if(strchr(esc, str[i]) != NULL){
-			escaped = 1;
-			continue;
-		}
-		if(strchr(quoting, str[i]) != NULL){
-			quoted = 1;
-			continue;
-		}
-		if(strchr(delim, str[i]) != NULL){
-			if(l4da_getlen(tmpstr) > 0){
-				tmpchar = '\0';
-				if(l4da_pushback(tmpstr, &tmpchar) < 0){
-					abort_l4arg_toargv;
-				}
-				addstr = (char*)l4da_drop_struct(tmpstr);
-				if(l4da_pushback(parr, &addstr) < 0){
-					l4da_free(parr);
-					return NULL;
-				}
-				tmpstr = l4da_create(sizeof(char), 0);
-				if(tmpstr == NULL){
-					l4da_free(parr);
-					return NULL;
-				}
+			if (detail != NULL && lbs_array_push_back (detail, &(int){-1}) < 0) {
+				goto free_detail;
 			}
-			delimed = 1;
+			stri++;
+			is_delimed = true;
 			continue;
 		}
-		if(l4da_pushback(tmpstr, &str[i]) < 0){
-			abort_l4arg_toargv;
+		if (strchr (esc, *p)) {
+			is_escaped = true;
+			continue;
 		}
-		delimed = 0;
-	}
-	if(!delimed){
-		tmpchar = '\0';
-		if(l4da_pushback(tmpstr, &tmpchar) < 0){
-			abort_l4arg_toargv;
+
+		is_delimed = false;
+
+		for (int i = 0; i < qlen; i++) {
+			if (strncmp (p, q[i].left, qllen[i]) == 0) {
+				is_quoted = true;
+				ignore_esc = q[i].super;
+				qi = i;
+				p += qllen[qi]; // p++ will be skipped, so do not minus 1 here
+				if (detail != NULL) {
+					lbs_array_v (detail, int, stri) = qi;
+				}
+				goto loop_start; // restart the loop
+			}
 		}
-		addstr = (char*)l4da_drop_struct(tmpstr);
-		if(l4da_pushback(parr, &addstr) < 0){
-			l4da_free(parr);
-			return NULL;
+
+		if (lbs_strv_append_char (strv, stri, *p) < 0) {
+			goto free_detail;
 		}
 	}
-	addstr = NULL;
-	if(l4da_pushback(parr, &addstr) < 0){
-		l4da_free(parr);
-		return NULL;
+
+	if (is_delimed && lbs_strv_get_str_len (strv, stri) == 0) {
+		lbs_strv_remove_str (strv);
+		lbs_array_pop_back (detail);
 	}
-	rval = (char**)l4da_drop_struct(parr);
-	return rval;
+
+	if (detail_ptr != NULL) {
+		*detail_ptr = detail;
+	}
+
+	return strv;
+
+
+	/* Error-handling goto label */
+
+free_detail:
+	if (detail != NULL) {
+		lbs_array_unref (detail);
+	}
+
+free_strv:
+	lbs_strv_unref (strv);
+	return NULL;
 }
 
-void l4arg_toargv_free(char** pargv){
-	int i;
-	for(i=0; pargv[i]!=NULL; i++){
-		free(pargv[i]);
-	}
-	free(pargv);
-}
 
-/* 為什麼叫做 qarg 呢？因為這是用來解析很像 QEMU 命令列參數的參數 */
+LbsArgQopt* lbs_arg_qopt_new (const char* str) {
+	LbsStrv* strv;
+	LbsArray* detail;
 
-L4QARG* l4qarg_parse(const char* str){
-	char** pargv = l4arg_toargv(str, ",", "\"\'", "\\");
-	if(pargv == NULL){
+	strv = lbs_arg_parse (str, ",", "\\", (LbsArgQuote[]) {
+		{ "\"", "\"", false }, { "\'", "\'", true }}, &detail);
+
+	if (strv == NULL || detail == NULL) {
 		return NULL;
 	}
-	int i, allc;
-	L4QARG* qargarr;
-	char* pos;
-	for(i=0; pargv[i]!=NULL; i++);
-	allc = i + 1;
-	qargarr = (L4QARG*) malloc(sizeof(L4QARG) * allc);
-	if(qargarr == NULL){
-		l4arg_toargv_free(pargv);
-		return NULL;
+	/* goto label => free_detail_and_strv */
+
+	size_t strv_len = lbs_strv_get_len (strv);
+	LbsArgQopt* qopt = malloc (sizeof (LbsArgQopt) +
+		sizeof (LbsArgQoptItem) * (strv_len + 1));
+	if (qopt == NULL) {
+		goto free_detail_and_strv;
 	}
-	for(i=0; pargv[i]!=NULL; i++){
-		pos = strchr(pargv[i], '=');
-		if(pos == NULL){
-			qargarr[i].arg_name = pargv[i];
-			qargarr[i].arg_value = NULL;
-		}else{
+
+	qopt->len = strv_len;
+	qopt->strv = NULL;
+	qopt->detail = NULL;
+	qopt->opts[strv_len] = (LbsArgQoptItem) { NULL, NULL };
+
+	for (size_t i = 0; i < strv_len; i++) {
+		qopt->opts[i].name = lbs_strv_dup_str (strv, i);
+		if (qopt->opts[i].name == NULL) {
+			goto free_qopt;
+		}
+
+		char* pos = strchr (qopt->opts[i].name, '=');
+		if (pos == NULL) {
+			qopt->opts[i].value = NULL;
+		} else {
 			*pos = '\0';
-			qargarr[i].arg_name = pargv[i];
-			pos++;
-			qargarr[i].arg_value = (char*) malloc(strlen(pos)+1);
-			if(qargarr[i].arg_value == NULL){
-				l4arg_toargv_free(pargv);
-				return NULL;
-			}
-			strcpy(qargarr[i].arg_value, pos);
+			qopt->opts[i].value = pos + 1;
 		}
+
 	}
-	free(pargv);
-	qargarr[i].arg_name = NULL;
-	qargarr[i].arg_value = NULL;
-	return qargarr;
+
+	qopt->strv = strv;
+	qopt->detail = detail;
+	return qopt;
+
+free_qopt:
+	lbs_arg_qopt_free (qopt);
+
+free_detail_and_strv:
+	lbs_strv_unref (strv);
+	lbs_array_unref (detail);
+	return NULL;
 }
 
-void l4qarg_free(L4QARG* qarg){
-	int i;
-	for(i=0; !(qarg[i].arg_name == NULL && qarg[i].arg_value == NULL); i++){
-		free(qarg[i].arg_name);
-		if(qarg[i].arg_value != NULL){
-			free(qarg[i].arg_value);
-		}
+void lbs_arg_qopt_free_generic (void* qopt_generic) {
+	if (qopt_generic == NULL) {
+		return;
 	}
-	free(qarg);
+
+	LbsArgQopt* qopt = qopt_generic;
+	lbs_strv_unref (qopt->strv);
+	lbs_array_unref (qopt->detail);
+
+	for (int i = 0; qopt->opts[i].name != NULL; i++) {
+		free (qopt->opts[i].name);
+	}
+
+	free (qopt);
 }

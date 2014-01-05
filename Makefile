@@ -47,7 +47,7 @@ test_array_o_DEPENDS=  l4array.o
 test_array2_o_DEPENDS= l4array2.o
 test_file_o_DEPENDS=   l4file.o l4array.o
 test_strv_o_DEPENDS=   l4strv.o l4array.o
-test_arg_o_DEPENDS=    l4arg.o l4array.o
+test_arg_o_DEPENDS=    l4arg.o l4array.o l4strv.o
 test_list_o_DEPENDS=   l4list.o
 
 .POSIX:
