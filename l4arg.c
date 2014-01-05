@@ -151,7 +151,8 @@ LbsArgQopt* lbs_arg_qopt_new (const char* str) {
 	LbsArray* detail;
 
 	strv = lbs_arg_parse (str, ",", "\\", (LbsArgQuote[]) {
-		{ "\"", "\"", false }, { "\'", "\'", true }}, &detail);
+		{ "\"", "\"", false }, { "\'", "\'", true }, { NULL, NULL, false}},
+		&detail);
 
 	if (strv == NULL || detail == NULL) {
 		return NULL;
