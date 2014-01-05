@@ -57,6 +57,7 @@ char*     lbs_strv_dup_str          (LbsStrv* strv, size_t stri);
     (lbs_array_v (lbs_strv_get_str_wrapper (strv, stri), char, (chri)))
 
 int       lbs_strv_append_char      (LbsStrv* strv, size_t stri, char chr);
+int       lbs_strv_append_str_empty (LbsStrv* strv);
 int       lbs_strv_append_str       (LbsStrv* strv, const char* bstr);
 int       lbs_strv_append_strv      (LbsStrv* strv, const char* const* bstrv);
 int       lbs_strv_remove_str       (LbsStrv* strv);

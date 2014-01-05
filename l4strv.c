@@ -12,7 +12,7 @@ LbsStrv* lbs_strv_new_with_max (size_t max) {
         return NULL;
     }
 
-    if (lbs_array_init (&strv->array, sizeof (LbsArray)) < 0) {
+    if (lbs_array_init_with_max (&strv->array, sizeof (LbsArray), max) < 0) {
         free (strv);
         return NULL;
     }
@@ -23,7 +23,7 @@ LbsStrv* lbs_strv_new_with_max (size_t max) {
 }
 
 int lbs_strv_init_with_max (LbsStrv* strv, size_t max) {
-    if (lbs_array_init (&strv->array, sizeof (LbsArray)) < 0) {
+    if (lbs_array_init_with_max (&strv->array, sizeof (LbsArray), max) < 0) {
         return -1;
     }
 
@@ -54,7 +54,7 @@ void lbs_strv_free_generic (void* strv_generic) {
         return;
     }
     LbsStrv* strv = LBS_STRV (strv_generic);
-    int i = 0;
+    size_t i = 0;
     for (; i < lbs_strv_get_len (strv); i++) {
         LbsArray* str_wrapper = lbs_strv_get_str_wrapper (strv, i);
         lbs_array_unref (str_wrapper);
@@ -96,6 +96,18 @@ int lbs_strv_append_char (LbsStrv* strv, size_t stri, char chr) {
     }
     LbsArray* str = lbs_strv_get_str_wrapper (strv, stri);
     return lbs_array_append_data (str, &chr);
+}
+
+int lbs_strv_append_str_empty (LbsStrv* strv) {
+    LbsArray str_struct, *str = &str_struct;
+    if (lbs_array_init (str, sizeof (char)) < 0) {
+        return -1;
+    }
+    if (lbs_array_append_data (&strv->array, &str_struct) < 0) {
+        lbs_array_unref (str);
+        return -1;
+    }
+    return 0;
 }
 
 int lbs_strv_append_str (LbsStrv* strv, const char* bstr) {
@@ -155,7 +167,7 @@ int lbs_strv_minimize (LbsStrv* strv) {
         return -1;
     }
 
-    int i;
+    size_t i;
     size_t len = lbs_strv_get_len (strv);
     for (i = 0; i < len; i++) {
         LbsArray* str = lbs_strv_get_str_wrapper (strv, i);
@@ -174,7 +186,7 @@ char** lbs_strv_copy_strv (LbsStrv* strv) {
         return NULL;
     }
 
-    int i;
+    size_t i;
     for (i = 0; i < len; i++) {
         LbsArray* str = lbs_strv_get_str_wrapper (strv, i);
         size_t str_len = lbs_array_get_len (str);
