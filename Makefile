@@ -20,6 +20,7 @@ M_CFLAGS=    -Wall -I. $(CFLAGS)
 M_LDFLAGS=   $(LDFLAGS)
 
 # Installation
+NAME=        l4basic
 DESTDIR=
 PREFIX=      /usr/local
 LIBDIR=      $(DESTDIR)$(PREFIX)/lib
@@ -50,9 +51,18 @@ test_strv_o_DEPENDS=   l4strv.o l4array.o
 test_arg_o_DEPENDS=    l4arg.o l4array.o l4strv.o
 test_list_o_DEPENDS=   l4list.o
 
+# Distribution
+EXTRA_DIST=            Makefile README README.zh VERSION
+RM_R=                  $(RM) -r
+CHMOD_R=               chmod -R 400
+CHMOD_W=               chmod -R 755
+TAR_PACK=              tar -zcf
+TAR_UNPACK=            tar -zxf
+TARBALL_EXTENSION=     .tar.gz
+
 .POSIX:
 .PHONY: all clean install install-HEADERS install-LIB \
-		uninstall deinstall remove
+		uninstall deinstall remove dist distcheck
 .SUFFIXES: .c.o
 .c.o:
 	$(CC) $(M_CFLAGS) -c $< -o $@
@@ -101,3 +111,22 @@ remove: uninstall
 uninstall:
 	for i in $(lib_LIBRARIES); do $(RM) $(LIBDIR)/$$i; done
 	for i in $(libl4basic_a_HEADERS); do $(RM) $(INCLUDEDIR)/$$i; done
+
+dist:
+	$(MKDIR_P) $(NAME)-`cat VERSION`
+	for i in $(EXTRA_DIST) $(check_OBJECTS:.o=.c) \
+		$(libl4basic_a_HEADERS) $(libl4basic_a_OBJECTS:.o=.c); do \
+		$(INSTALL) $$i $(NAME)-`cat VERSION`; done
+	$(TAR_PACK) $(NAME)-`cat VERSION`$(TARBALL_EXTENSION) $(NAME)-`cat VERSION`
+	$(RM_R) $(NAME)-`cat VERSION`
+
+distcheck: dist
+	$(TAR_UNPACK) $(NAME)-`cat VERSION`$(TARBALL_EXTENSION)
+	cd $(NAME)-`cat VERSION` && $(MAKE) \
+		CC="$(CC)" AR="$(AR)" RANLIB="$(RANLIB)" RM="$(RM)" \
+		MKDIR="$(MKDIR)" MKDIR_P="$(MKDIR_P)" INSTALL="$(INSTALL)" \
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
+	$(RM_R) $(NAME)-`cat VERSION`
+	@echo "--------------------"
+	@echo "$(NAME)-`cat VERSION`$(TARBALL_EXTENSION) is ready for distribution!"
+	@echo "--------------------"
