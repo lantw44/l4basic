@@ -14,12 +14,17 @@
 #  define LBS_COMMON_CHECK_TYPE(x,type) (x)
 # endif
 #else
-# define bool  char
-# define true  1
-# define false 0
-# define inline
-# define LBS_COMMON_ISO_C89
-# define LBS_COMMON_CHECK_TYPE(x,type) (x)
+# ifdef __cplusplus
+#  define LBS_COMMON_CXX
+#  define LBS_COMMON_CHECK_TYPE(x,type) (x)
+# else
+#  define bool  char
+#  define true  1
+#  define false 0
+#  define inline
+#  define LBS_COMMON_ISO_C89
+#  define LBS_COMMON_CHECK_TYPE(x,type) (x)
+# endif /* __cplusplus */
 #endif /* __STDC_VERSION__ */
 
 #define LBS_COMMON_NULL_PTR ((void*)NULL)
