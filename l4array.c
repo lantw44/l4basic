@@ -74,7 +74,7 @@ LbsArray* lbs_array_copy (LbsArray* dest, const LbsArray* src) {
 
     dest->len = src->len;
     dest->free_func = src->free_func;
-    if (src->data != NULL) {
+    if (src->data != NULL && dest->data != NULL) {
         memcpy (dest->data, src->data, src->size * src->len);
     }
     return dest;
@@ -121,7 +121,7 @@ void lbs_array_free_generic (void* array_generic) {
     }
     LbsArray* array = LBS_ARRAY (array_generic);
     if (array->free_func != NULL) {
-        int i = 0;
+        size_t i = 0;
         char* d = array->data;
         for (; i < array->len; i++, d += array->size) {
             (*(array->free_func)) (*((void**)d));
