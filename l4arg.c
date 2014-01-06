@@ -18,8 +18,24 @@ LbsStrv* lbs_arg_parse (const char* str, const char* delim,
 	for (qlen = 0; q[qlen].left != NULL && q[qlen].right != NULL; qlen++);
 
 	// qlen will not be too long, so we can use VLA
-	int qllen[qlen <= 0 ? 1 : qlen]; // left quoting string length
-	int qrlen[qlen <= 0 ? 1 : qlen]; // right quoting string length
+	int qlen_p = qlen <= 0 ? 1 : qlen;
+
+#if __STDC_NO_VLA__
+	int* qllen = malloc (sizeof (int) * qlen_p);
+	if (qllen == NULL) {
+		lbs_strv_unref (strv);
+		return NULL;
+	}
+	int* qrlen = malloc (sizeof (int) * qlen_p);
+	if (qrlen == NULL) {
+		lbs_strv_unref (strv);
+		return NULL;
+	}
+#else
+	int qllen[qlen_p]; // left quoting string length
+	int qrlen[qlen_p]; // right quoting string length
+#endif
+
 	for (int i = 0; i < qlen; i++) {
 		// empty strings are not allowed
 		qllen[i] = strlen (q[i].left);
@@ -130,6 +146,10 @@ loop_start:
 		*detail_ptr = detail;
 	}
 
+#if __STDC_NO_VLA__
+	free (qllen);
+	free (qrlen);
+#endif
 	return strv;
 
 
@@ -141,6 +161,10 @@ free_detail:
 	}
 
 free_strv:
+#if __STDC_NO_VLA__
+	free (qllen);
+	free (qrlen);
+#endif
 	lbs_strv_unref (strv);
 	return NULL;
 }
