@@ -5,21 +5,21 @@
 #include <string.h>
 
 LbsArray2* lbs_array2_new (size_t size, int lenx, int leny) {
-	if(size <= 0 || lenx <= 0 || leny <= 0){
-		return NULL;
-	}
+    if(size <= 0 || lenx <= 0 || leny <= 0){
+        return NULL;
+    }
 
-	LbsArray2* array2 = malloc (
+    LbsArray2* array2 = malloc (
         sizeof (LbsArray2) + size * lenx * leny);
-	if(array2 == NULL){
-		return NULL;
-	}
+    if(array2 == NULL){
+        return NULL;
+    }
 
-	array2->size = size;
-	array2->lenx = lenx;
-	array2->leny = leny;
+    array2->size = size;
+    array2->lenx = lenx;
+    array2->leny = leny;
     array2->ref_count = 1;
-	return array2;
+    return array2;
 }
 
 void lbs_array2_copy_in (LbsArray2* array2, const void* copy_in) {
