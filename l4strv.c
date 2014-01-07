@@ -134,7 +134,7 @@ int lbs_strv_append_str (LbsStrv* strv, const char* bstr) {
         free (str_copy);
         return -1;
     }
-    
+
     return 0;
 }
 
