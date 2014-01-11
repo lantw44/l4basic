@@ -1,6 +1,6 @@
 /* vim: set sw=4 ts=4 sts=4 et: */
 #define _POSIX_C_SOURCE 200809L
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 700
 #include "l4posix.h"
 
 #include <arpa/inet.h>

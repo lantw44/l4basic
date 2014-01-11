@@ -1,7 +1,7 @@
 /* vim: set sw=4 ts=4 sts=4 et: */
 #undef NDEBUG
 #define _POSIX_C_SOURCE 200809L
-#define _NETBSD_SOURCE /* Get strdup(3) on NetBSD */
+#define _XOPEN_SOURCE 700
 #include <l4array.h>
 
 #include <assert.h>
