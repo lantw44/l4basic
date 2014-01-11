@@ -29,7 +29,7 @@ INCLUDEDIR=  $(DESTDIR)$(PREFIX)/include
 # Tasks definition
 lib_LIBRARIES=         libl4basic.a
 libl4basic_a_OBJECTS=  l4array.o l4array2.o l4file.o l4strv.o l4arg.o \
-					   l4list.o
+					   l4list.o l4str.o l4posix.o l4sysdep.o
 libl4basic_a_HEADERS=  $(libl4basic_a_OBJECTS:.o=.h) l4common.h
 
 check_PROGRAMS=        test-array test-array2 test-file test-strv test-arg \
@@ -43,6 +43,9 @@ l4file_o_DEPENDS=      l4common.h l4array.o
 l4strv_o_DEPENDS=      l4common.h l4array.o
 l4arg_o_DEPENDS=       l4common.h l4array.o
 l4list_o_DEPENDS=      l4common.h
+l4str_o_DEPENDS=       l4common.h
+l4posix_o_DEPENDS=     l4common.h
+l4sysdep_o_DEPENDS=    l4common.h l4posix.o l4str.o
 
 test_array_o_DEPENDS=  l4array.o
 test_array2_o_DEPENDS= l4array2.o
@@ -79,6 +82,9 @@ l4file.o: l4file.c l4file.h $(l4file_o_DEPENDS)
 l4strv.o: l4strv.c l4strv.h $(l4strv_o_DEPENDS)
 l4arg.o: l4arg.c l4arg.h $(l4arg_o_DEPENDS)
 l4list.o: l4list.c l4list.h $(l4list_o_DEPENDS)
+l4str.o: l4str.c l4str.h $(l4list_o_DEPENDS)
+l4posix.o: l4posix.c l4posix.h $(l4list_o_DEPENDS)
+l4sysdep.o: l4sysdep.c l4sysdep.h $(l4list_o_DEPENDS)
 
 test-array: test-array.o $(test_array_o_DEPENDS)
 	$(CC) $(M_CFLAGS) test-array.o $(test_array_o_DEPENDS) -o $@ $(M_LDFLAGS)
@@ -125,7 +131,7 @@ distcheck: dist
 	cd $(NAME)-`cat VERSION` && $(MAKE) \
 		CC="$(CC)" AR="$(AR)" RANLIB="$(RANLIB)" RM="$(RM)" \
 		MKDIR="$(MKDIR)" MKDIR_P="$(MKDIR_P)" INSTALL="$(INSTALL)" \
-		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" all check
 	$(RM_R) $(NAME)-`cat VERSION`
 	@echo "--------------------"
 	@echo "$(NAME)-`cat VERSION`$(TARBALL_EXTENSION) is ready for distribution!"
