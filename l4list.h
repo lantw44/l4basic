@@ -1,66 +1,114 @@
-#ifndef L4LIB_BASIC_DATA_STRUCTURE
-#define L4LIB_BASIC_DATA_STRUCTURE
+/* vim: set sw=4 ts=4 sts=4 et: */
+#ifndef LBS_LIST_H
+#define LBS_LIST_H
 
-/*********** list ***********/
+#include <l4common.h>
 
-typedef struct l4lib_list_node{ /* list 中每一個項目用的資料結構，會有很多個 */
-	struct l4lib_list_node* node_prev;
-	struct l4lib_list_node* node_next;
-	void* node_data;
-	int node_data_size;
-} L4LLNODE;
+typedef struct LbsListStruct { /* list node */
+    /*< private >*/
+    struct LbsListStruct* prev;     /* pointer to the previous node */
+    struct LbsListStruct* next;     /* pointer to the next node */
 
-typedef struct l4lib_list{ /* 管理 list 用的，每個 list 只有一個 */
-	struct l4lib_list_node* list_first;
-	struct l4lib_list_node* list_last;
-	int list_len;
-} L4LL;
+    /*< public >*/
+    void (*free_func) (void* data); /* function to free the data pointer */
+    void* data;                     /* data pointer */
+} LbsList;
 
-L4LL* l4ll_create(void);
-void l4ll_free(L4LL*);
-#define l4ll_prev(node) ((node)->node_prev)
-#define l4ll_next(node) ((node)->node_next)
-#define l4ll_len(list) ((list)->list_len)
-#define l4ll_node_back(list) ((list)->list_last)
-#define l4ll_node_front(list) ((list)->list_first)
-#define l4ll_data(node) ((node)->node_data)
-#define l4ll_datasize(node) ((node)->node_data_size)
-L4LLNODE* l4ll_insert_prev(L4LL*, L4LLNODE*, const void*, int);
-L4LLNODE* l4ll_insert_next(L4LL*, L4LLNODE*, const void*, int);
-void l4ll_remove(L4LL*, L4LLNODE*);
-#define l4ll_pushback(list,data,size) \
-	(l4ll_insert_next((list),(l4ll_node_back(list)),(data),(size)))
-#define l4ll_pushfront(list,data,size) \
-	(l4ll_insert_prev((list),(l4ll_node_front(list)),(data),(size)))
-#define l4ll_popback(list) \
-	(l4ll_remove((list),(l4ll_node_back((list)))))
-#define l4ll_popfront(list) \
-	(l4ll_remove((list),(l4ll_node_front((list)))))
-L4LLNODE* l4ll_goto(L4LLNODE*, int);
+typedef struct LbsListMetaStruct { /* list wrapper */
+    /*< private >*/
+    struct LbsListStruct* first;    /* pointer to the first node in the list */
+    struct LbsListStruct* last;     /* pointer to the last node in the list */
+    size_t len;                     /* current length of the list */
 
-/*********** stack ***********/
+    /*< public >*/
+    void (*free_func) (void* data);
+    /* Function to free the data pointer. This function is used only if
+     * the free_func field in the node is set to NULL */
+} LbsListMeta;
 
-typedef L4LL L4STACK;
-#define l4stack_create() (l4ll_create())
-#define l4stack_free(list) (l4ll_free(list))
-#define l4stack_push(list,data,size) (l4ll_pushback((list),(data),(size)))
-#define l4stack_pop(list) (l4ll_popback(list))
-#define l4stack_len(list) (l4ll_len(list))
-#define l4stack_data(list) (l4ll_data(l4ll_node_back(list)))
-#define l4stack_datasize(list) (l4ll_datasize(l4ll_node_back(list)))
+#define      LBS_LIST(x)               ((LbsList*)(x))
+#define      LBS_LIST_META(x)          ((LbsListMeta*)(x))
 
-/*********** queue ***********/
+LbsListMeta* lbs_list_meta_new         (void (*free_func) (void*));
+void         lbs_list_meta_free        (LbsListMeta* list);
 
-typedef L4LL L4QUEUE;
-#define l4queue_create() (l4ll_create())
-#define l4queue_free(list) (l4ll_free(list))
-#define l4queue_push(list,data,size) (l4ll_pushback((list),(data),(size)))
-#define l4queue_pop(list) (l4ll_popfront(list))
-#define l4queue_len(list) (l4ll_len(list))
-#define l4queue_frontdata(list) (l4ll_data(l4ll_node_front(list)))
-#define l4queue_frontdatasize(list) (l4ll_datasize(l4ll_node_front(list)))
-#define l4queue_backdata(list) (l4ll_data(l4ll_node_back(list)))
-#define l4queue_backdatasize(list) (l4ll_datasize(l4ll_node_back(list)))
-#define l4queue_data(list) (l4queue_frontdata(list))
-#define l4queue_datasize(list) (l4queue_frontdatasize(list))
-#endif
+#define      lbs_list_meta_get_first(list) \
+    (LBS_COMMON_CHECK_TYPE ((list), LbsListMeta*)->first)
+#define      lbs_list_meta_get_last(list) \
+    (LBS_COMMON_CHECK_TYPE ((list), LbsListMeta*)->last)
+#define      lbs_list_meta_get_len(list) \
+    (LBS_COMMON_CHECK_TYPE ((list), LbsListMeta*)->len)
+#define      lbs_list_meta_get_free_func(list) \
+    (LBS_COMMON_CHECK_TYPE ((list), LbsListMeta*)->free_func)
+
+#define      lbs_list_meta_set_free_func(list,value) \
+    ((LBS_COMMON_CHECK_TYPE ((list), LbsListMeta*)->free_func) = (value))
+
+#define      lbs_list_get_prev(node) \
+    (LBS_COMMON_CHECK_TYPE ((node), LbsList*)->prev)
+#define      lbs_list_get_next(node) \
+    (LBS_COMMON_CHECK_TYPE ((node), LbsList*)->next)
+#define      lbs_list_get_data(node) \
+    (LBS_COMMON_CHECK_TYPE ((node), LbsList*)->data)
+#define      lbs_list_get_free_func(node) \
+    (LBS_COMMON_CHECK_TYPE ((node), LbsList*)->free_func)
+
+#define      lbs_list_set_data(node,value) \
+    ((LBS_COMMON_CHECK_TYPE ((node), LbsList*)->data) = (value))
+#define      lbs_list_set_free_func(node,value) \
+    ((LBS_COMMON_CHECK_TYPE ((node), LbsList*)->free_func) = (value))
+
+LbsList*     lbs_list_insert_prev      (LbsListMeta* list, LbsList* node,
+                                        void* data, void (*free_func) (void*));
+LbsList*     lbs_list_insert_next      (LbsListMeta* list, LbsList* node,
+                                        void* data, void (*free_func) (void*));
+void         lbs_list_remove           (LbsListMeta* list, LbsList* node);
+
+#define      lbs_list_push_back(list,data,f) \
+    (lbs_list_insert_next ((list), (lbs_list_meta_get_last (list)), (data), (f)))
+#define      lbs_list_push_front(list,data,f) \
+    (lbs_list_insert_prev ((list), (lbs_list_meta_get_first (list)), (data), (f)))
+#define      lbs_list_pop_back(list) \
+    (lbs_list_remove ((list), (lbs_list_meta_get_last ((list)))))
+#define      lbs_list_pop_front(list) \
+    (lbs_list_remove ((list), (lbs_list_meta_get_first ((list)))))
+
+LbsList*     lbs_list_goto             (LbsList* node, int count);
+#define      lbs_list_meta_goto(list,count) \
+    (lbs_list_goto ((lbs_list_meta_get_first (list)), (count)))
+
+
+#ifndef LBS_LIST_DISABLE_STACK
+
+typedef      LbsListMeta LbsStack;
+#define      lbs_stack_new(f)          (lbs_list_meta_new (f))
+#define      lbs_stack_free(stack)     (lbs_list_meta_free (stack))
+#define      lbs_stack_push(stack,data,f) \
+    (lbs_list_push_back ((stack), (data), (f)))
+#define      lbs_stack_pop(stack)      (lbs_list_pop_back (stack))
+#define      lbs_stack_get_len(stack)  (lbs_list_meta_get_len (stack))
+#define      lbs_stack_get_data(stack) \
+    (lbs_list_get_data (lbs_list_meta_get_last (stack)))
+
+#endif /* LBS_LIST_DISABLE_STACK */
+
+
+#ifndef LBS_LIST_DISABLE_QUEUE
+
+typedef      LbsListMeta LbsQueue;
+#define      lbs_queue_new(f)          (lbs_list_meta_new (f))
+#define      lbs_queue_free(queue)     (lbs_list_meta_free (queue))
+#define      lbs_queue_enqueue(queue,data,f) \
+    (lbs_list_push_back ((queue), (data), (f)))
+#define      lbs_queue_dequeue(queue)  (lbs_list_pop_front (queue))
+#define      lbs_queue_get_len(queue)  (lbs_list_meta_get_len (queue))
+#define      lbs_queue_get_front(queue) \
+    (lbs_list_get_data (lbs_list_meta_get_first (queue)))
+#define      lbs_queue_get_back(queue) \
+    (lbs_list_get_data (lbs_list_meta_get_last (queue)))
+#define      lbs_queue_get_data(queue) (lbs_queue_get_front (queue))
+
+#endif /* LBS_LIST_DISABLE_QUEUE */
+
+
+#endif /* LBS_LIST_H */
