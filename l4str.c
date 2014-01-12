@@ -25,18 +25,28 @@ bool lbs_str_has_suffix (const char* str, const char* suffix) {
 char* lbs_str_printf (const char* format, ...) {
     va_list ap;
     char* newstr;
-    int len;
 
     va_start (ap, format);
-    len = vsnprintf (NULL, 0, format, ap) + 1;
-    va_end (ap);
-
-    newstr = malloc (len);
-
-    va_start (ap, format);
-    vsnprintf (newstr, len, format, ap);
+    newstr = lbs_str_vprintf (format, ap);
     va_end (ap);
 
     return newstr;
 }
 
+char* lbs_str_vprintf (const char* format, va_list ap) {
+    va_list ap1, ap2;
+    char* newstr;
+    int len;
+
+    va_copy (ap1, ap);
+    len = vsnprintf (NULL, 0, format, ap1) + 1;
+    va_end (ap1);
+
+    newstr = malloc (len);
+
+    va_copy (ap2, ap);
+    vsnprintf (newstr, len, format, ap2);
+    va_end (ap2);
+
+    return newstr;
+}
