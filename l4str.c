@@ -7,6 +7,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+bool lbs_str_has_prefix (const char* str, const char* prefix) {
+    int i;
+    for (i = 0; str[i] != '\0' && prefix[i] != '\0'; i++) {
+        if (str[i] != prefix[i]) {
+            return false;
+        }
+    }
+    if (str[i] == '\0' && prefix[i] == '\0') {
+        return true;
+    }
+    if (str[i] == '\0') {
+        return false;
+    }
+    return true;
+}
+
 bool lbs_str_has_suffix (const char* str, const char* suffix) {
     size_t len = strlen (str);
     size_t suflen = strlen (suffix);
