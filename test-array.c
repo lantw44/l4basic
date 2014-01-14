@@ -168,6 +168,16 @@ void test_array_op (void) {
         assert (lbs_array_v (array, int, i) == i);
     }
 
+    array->len = 4;
+    lbs_array_minimize (array);
+
+    int arrins[] = { 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+    lbs_array_append_mass (array, arrins, 10);
+    assert (lbs_array_get_len (array) == 14);
+    for (int i = 0; i < 14; i++) {
+        assert (lbs_array_v (array, int, i) == i);
+    }
+
     lbs_array_unref (array);
     printf ("%s => PASS!\n", __func__);
 }

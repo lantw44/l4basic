@@ -194,7 +194,7 @@ int lbs_array_append_ptr (LbsArray* array, const void* ptr) {
 
 int lbs_array_append_data (LbsArray* array, const void* data) {
     if (array->max < array->len + 1) {
-        if (array->max > 0){
+        if (array->max > 0) {
             if (lbs_array_set_max (array, array->max * 2) < 0) {
                 return -1;
             }
@@ -207,6 +207,29 @@ int lbs_array_append_data (LbsArray* array, const void* data) {
 
     memcpy (lbs_array_vp (array, array->len), data, array->size);
     array->len++;
+    return 0;
+}
+
+int lbs_array_append_mass (LbsArray* array, const void* data, size_t count) {
+    bool need_expand = false;
+
+    while (array->max < array->len + count) {
+        need_expand = true;
+        if (array->max > 0) {
+            array->max *= 2;
+        } else {
+            array->max = 1;
+        }
+    }
+
+    if (need_expand) {
+        if (lbs_array_set_max (array, array->max) < 0) {
+            return -1;
+        }
+    }
+
+    memcpy (lbs_array_vp (array, array->len), data, array->size * count);
+    array->len += count;
     return 0;
 }
 

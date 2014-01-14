@@ -69,6 +69,8 @@ int       lbs_array_set_max       (LbsArray* array, size_t max);
     (lbs_array_append_data ((array), (&(var))))
 int       lbs_array_append_ptr    (LbsArray* array, const void* ptr);
 int       lbs_array_append_data   (LbsArray* array, const void* data);
+int       lbs_array_append_mass   (LbsArray* array, const void* data,
+                                   size_t count);
 int       lbs_array_remove        (LbsArray* array);
 int       lbs_array_minimize      (LbsArray* array);
 #define   lbs_array_push_back     lbs_array_append_data
